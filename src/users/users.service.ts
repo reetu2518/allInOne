@@ -1,4 +1,4 @@
-import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotAcceptableException, NotFoundException, NotImplementedException } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from "bcryptjs";
 import { Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { messages } from '../common/constants/constant';
 import { UserLoginDto } from './dto/login.dto';
 import { JwtPayload } from './jwt-payload';
+import { UserRepository } from './user.repositry';
 
 /**
  * User Service
@@ -18,9 +19,8 @@ export class UsersService {
   logger = new Logger(UsersService.name);
 
   constructor(
-    // @Inject(User) private userRepo : Repository<User>,
     private jwtService: JwtService,
-    @InjectRepository(User) private userRepo : Repository<User>
+    private userRepo : UserRepository
   ) {}
 
   /**
@@ -34,15 +34,14 @@ export class UsersService {
       const salt = await bcrypt.genSalt();
       const hash = await bcrypt.hash(createUserDto.password, salt);
       createUserDto.password = hash;
-
       const res = await this.userRepo.save(createUserDto);
-      this.logger.log("User Created Sucessfully");
+      this.logger.log(messages.REGISTER_SUCCESS);
       return { message: messages.REGISTER_SUCCESS };
     } catch (error) {
+      console.log(error, "error");
+      
       if (error.code == '23505') {
         throw new ConflictException({ status: HttpStatus.CONFLICT, message: `User ${messages.ALREADY_EXIST}` });
-      } else {
-        throw new InternalServerErrorException({ status: HttpStatus.INTERNAL_SERVER_ERROR, message: messages.INTERNAL_ERROR });
       }
     }
   }
@@ -53,11 +52,10 @@ export class UsersService {
   * @returns Token
   * @throw - Error handle : NotFoundException, InternalServerErrorException, NotAcceptableException
   */
-  async login(loginDto: UserLoginDto) {
-    try {
+  async login(loginDto: UserLoginDto):Promise<String> {
       const res = await this.userRepo.findOneBy({ emailId: loginDto.emailId });
       if (res?.id == null) {
-        throw new HttpException(`User ${messages.RECORD_NOT_FOUND}`, HttpStatus.NOT_FOUND);
+        throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: `User ${messages.RECORD_NOT_FOUND}` });
       } else {
         let passwordCompare = await bcrypt.compare(loginDto.password, res.password);
         if (!passwordCompare) { throw new NotAcceptableException(messages.INVALID_USER); }
@@ -67,15 +65,6 @@ export class UsersService {
         let token = await this.jwtService.signAsync(jwtPayload);
         return token;
       }
-    } catch (error) {
-      if (error?.message == `User ${messages.RECORD_NOT_FOUND}`) {
-        throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: `User ${messages.RECORD_NOT_FOUND}` });
-      } else if (error?.message == messages.INVALID_USER) {
-        throw new NotAcceptableException(messages.INVALID_USER)
-      } else {
-        throw new InternalServerErrorException({ status: HttpStatus.INTERNAL_SERVER_ERROR, message: messages.INTERNAL_ERROR });
-      }
-    }
   }
  
   /**

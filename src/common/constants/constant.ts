@@ -16,7 +16,9 @@ export const messages = {
   ORDER_SUCCESS: 'Order Created Successfully!',
   FETCH_SUCCESS: 'Record fetch Successfully!',
   CREATE_SUCCESS: 'created Successfully!',
+  DELETE_SUCCESS: 'deleted Successfully!',
   MUST_STRING: 'should be string!',
   MUST_NUMBER: 'should be numberic!',
   LOGIN_BALANCE: 'User Login Sucessfully with email:',
+  SUBMIT_SUCCESS: 'form submitted Successfully!',
 };

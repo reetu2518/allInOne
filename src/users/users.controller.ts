@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, UseInterceptors, ValidationPipe, HttpStatus, UseGuards, UseFilters } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UsePipes, UseInterceptors, ValidationPipe, HttpStatus, UseFilters } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -10,7 +10,7 @@ import { HttpExceptionFilter } from '../common/exception-filter/exception-filter
 /**
  * User Controller
  */
-@UseFilters(HttpExceptionFilter)
+// @UseFilters(HttpExceptionFilter)
 @UsePipes(ValidationPipe)
 @UseInterceptors(ResponseInterceptor)
 @ApiTags("User")
@@ -23,8 +23,10 @@ export class UsersController {
    * @param createUserDto - User Details
    * @returns - Message : Uesr Created Success
    */
+  @ApiOkResponse({ status: HttpStatus.OK, description: messages.FETCH_SUCCESS })
+  @ApiInternalServerErrorResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: messages.INTERNAL_ERROR })
   @Post('/register')
-  create(@Body() createUserDto: CreateUserDto): Promise<Object> {
+  create(@Body() createUserDto: CreateUserDto): Promise<Object> {    
     return this.usersService.create(createUserDto);
   }
 
@@ -37,8 +39,7 @@ export class UsersController {
   @ApiNotFoundResponse({ status: HttpStatus.NOT_FOUND, description: messages.NOT_FOUND })
   @ApiInternalServerErrorResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: messages.INTERNAL_ERROR })
   @Post('/login')
-  async login(@Body(ValidationPipe) loginDto: UserLoginDto): Promise<String> {
-    return "sdfs";
+  async login(@Body() loginDto: UserLoginDto): Promise<String> {
     return await this.usersService.login(loginDto);
   }
 
@@ -55,25 +56,4 @@ export class UsersController {
   async userDetail(@Param('id') id: number) {
     return await this.usersService.userDetail(id);
   }
-
-
-  // @Get()
-  // findAll() {
-  //   return this.usersService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.usersService.remove(+id);
-  // }
 }
