@@ -42,7 +42,8 @@ export class CreateUserDto {
     /**
      * Phone Number
      */
-    @ApiProperty({ description: 'phone_number' })
+    @ApiProperty({ description: 'Phone number' })
+    @IsNumber()
     phoneNumber: number;
 
     /**
@@ -98,5 +99,6 @@ export class CreateUserDto {
     /**
      * Relation with Profile Table
      */
+    @ApiProperty({description:"Profile Details"})
     profile: Profile;
 }

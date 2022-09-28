@@ -1,16 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, UseInterceptors, ValidationPipe, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, UseInterceptors, ValidationPipe, HttpStatus, UseGuards, UseFilters } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { messages } from '../common/constants/constant';
 import { UserLoginDto } from './dto/login.dto';
+import { ResponseInterceptor } from '../common/interceptor/response-interceptors.interceptors';
+import { HttpExceptionFilter } from '../common/exception-filter/exception-filter.filter';
 
 /**
  * User Controller
  */
-// @UseFilters(HttpExceptionFilter)
+@UseFilters(HttpExceptionFilter)
 @UsePipes(ValidationPipe)
-// @UseInterceptors(ResponseInterceptor)
+@UseInterceptors(ResponseInterceptor)
 @ApiTags("User")
 @Controller('users')
 export class UsersController {
@@ -37,7 +39,7 @@ export class UsersController {
   @Post('/login')
   async login(@Body(ValidationPipe) loginDto: UserLoginDto): Promise<String> {
     return "sdfs";
-    // return await this.usersService.login(loginDto);
+    return await this.usersService.login(loginDto);
   }
 
   /**
@@ -51,7 +53,7 @@ export class UsersController {
   @ApiInternalServerErrorResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: messages.INTERNAL_ERROR })
   @Get('/:id')
   async userDetail(@Param('id') id: number) {
-    // return await this.usersService.userDetail(id);
+    return await this.usersService.userDetail(id);
   }
 
 

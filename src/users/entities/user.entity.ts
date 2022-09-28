@@ -104,7 +104,12 @@ export class User {
   /**
    * Relation with Profile Table
    */
-  @OneToOne(() => Profile)
+  @OneToOne(() => Profile, (profile)=>profile.user, {
+    cascade:true,
+    eager:true,
+    onUpdate:"CASCADE",
+    onDelete:"CASCADE"
+  })
   @JoinColumn({name:"profile_id"})
   profile: Profile;
 

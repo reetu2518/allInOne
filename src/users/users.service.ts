@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { messages } from '../common/constants/constant';
 import { UserLoginDto } from './dto/login.dto';
+import { JwtPayload } from './jwt-payload';
 
 /**
  * User Service
@@ -18,7 +19,7 @@ export class UsersService {
 
   constructor(
     // @Inject(User) private userRepo : Repository<User>,
-    // private jwtService: JwtService,
+    private jwtService: JwtService,
     @InjectRepository(User) private userRepo : Repository<User>
   ) {}
 
@@ -53,29 +54,28 @@ export class UsersService {
   * @throw - Error handle : NotFoundException, InternalServerErrorException, NotAcceptableException
   */
   async login(loginDto: UserLoginDto) {
-    // try {
-    //   const res = await this.userRepo.findOneBy({ emailId: loginDto.emailId });
-    //   if (res?.id == null) {
-    //     throw new HttpException(`User ${messages.RECORD_NOT_FOUND}`, HttpStatus.NOT_FOUND);
-    //   } else {
-    //     let passwordCompare = await bcrypt.compare(loginDto.password, res.password);
-    //     if (!passwordCompare) { throw new NotAcceptableException(messages.INVALID_USER); }
+    try {
+      const res = await this.userRepo.findOneBy({ emailId: loginDto.emailId });
+      if (res?.id == null) {
+        throw new HttpException(`User ${messages.RECORD_NOT_FOUND}`, HttpStatus.NOT_FOUND);
+      } else {
+        let passwordCompare = await bcrypt.compare(loginDto.password, res.password);
+        if (!passwordCompare) { throw new NotAcceptableException(messages.INVALID_USER); }
 
-    //     this.logger.warn(`User Login Sucessfully with email: ${res.emailId}`);
-    //     // const jwtPayload: JwtPayload = { emailId: loginDto.emailId };
-    //     // let token = await this.jwtService.signAsync(jwtPayload);
-    //     // return token;
-    //     return "";
-    //   }
-    // } catch (error) {
-    //   if (error?.message == `User ${messages.RECORD_NOT_FOUND}`) {
-    //     throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: `User ${messages.RECORD_NOT_FOUND}` });
-    //   } else if (error?.message == messages.INVALID_USER) {
-    //     throw new NotAcceptableException(messages.INVALID_USER)
-    //   } else {
-    //     throw new InternalServerErrorException({ status: HttpStatus.INTERNAL_SERVER_ERROR, message: messages.INTERNAL_ERROR });
-    //   }
-    // }
+        this.logger.warn(`User Login Sucessfully with email: ${res.emailId}`);
+        const jwtPayload: JwtPayload = { emailId: loginDto.emailId };
+        let token = await this.jwtService.signAsync(jwtPayload);
+        return token;
+      }
+    } catch (error) {
+      if (error?.message == `User ${messages.RECORD_NOT_FOUND}`) {
+        throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: `User ${messages.RECORD_NOT_FOUND}` });
+      } else if (error?.message == messages.INVALID_USER) {
+        throw new NotAcceptableException(messages.INVALID_USER)
+      } else {
+        throw new InternalServerErrorException({ status: HttpStatus.INTERNAL_SERVER_ERROR, message: messages.INTERNAL_ERROR });
+      }
+    }
   }
  
   /**
@@ -83,21 +83,21 @@ export class UsersService {
    * @param id - User Id
    * @returns 0 User Details
    */
-  // async userDetail(id:number): Promise<CreateUserDto[]> {
-  //   try {
-  //     const res = await this.userRepo.getUserSummary(id);
-  //     if (res.length == 0) {
-  //       throw new NotFoundException({status:HttpStatus.NOT_FOUND, message:`User ${messages.RECORD_NOT_FOUND}`});
-  //     } else {
-  //       return res;
-  //     }
-  //   } catch (error) {
-  //     if (error?.message == `User ${messages.RECORD_NOT_FOUND}`) {
-  //       throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: `User ${messages.RECORD_NOT_FOUND}` });
-  //     } else {
-  //       throw new InternalServerErrorException({status:HttpStatus.INTERNAL_SERVER_ERROR, message:messages.INTERNAL_ERROR});
-  //     }
-  //   }
-  // }
+  async userDetail(id:number): Promise<CreateUserDto[]> {
+    try {
+      const res = await this.userRepo.findBy({id});
+      if (res.length == 0) {
+        throw new NotFoundException({status:HttpStatus.NOT_FOUND, message:`User ${messages.RECORD_NOT_FOUND}`});
+      } else {
+        return res;
+      }
+    } catch (error) {
+      if (error?.message == `User ${messages.RECORD_NOT_FOUND}`) {
+        throw new NotFoundException({ status: HttpStatus.NOT_FOUND, message: `User ${messages.RECORD_NOT_FOUND}` });
+      } else {
+        throw new InternalServerErrorException({status:HttpStatus.INTERNAL_SERVER_ERROR, message:messages.INTERNAL_ERROR});
+      }
+    }
+  }
 
 }
