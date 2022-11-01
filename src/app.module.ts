@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { ContactModule } from './contact/contact.module';
 
+/**
+ * App Module
+ */
 @Module({
   imports: [
     ConfigModule.forRoot(),

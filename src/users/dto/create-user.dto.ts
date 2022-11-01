@@ -100,5 +100,5 @@ export class CreateUserDto {
      * Relation with Profile Table
      */
     @ApiProperty({description:"Profile Details"})
-    profile: Profile;
+    profile?: Profile;
 }

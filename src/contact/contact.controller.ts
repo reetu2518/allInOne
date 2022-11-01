@@ -51,7 +51,7 @@ export class ContactController {
   @ApiNotFoundResponse({ status: HttpStatus.NOT_FOUND, description: messages.NOT_FOUND })
   @ApiInternalServerErrorResponse({ status: HttpStatus.INTERNAL_SERVER_ERROR, description: messages.INTERNAL_ERROR })
   @Delete(':id')
-  remove(@Param('id') id: string):Promise<Object>{
+  remove(@Param('id') id: number):Promise<Object>{
     return this.contactService.remove(+id);
   }
 }

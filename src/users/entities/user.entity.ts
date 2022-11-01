@@ -111,7 +111,7 @@ export class User {
     onDelete:"CASCADE"
   })
   @JoinColumn({name:"profile_id"})
-  profile: Profile;
+  profile?: Profile;
 
   /**
    * Created date
